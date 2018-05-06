@@ -122,7 +122,8 @@ plt.show()
 - given a set of data, describe what you would expect if that data were to be acquired again
 - **statistical inference**: process of going from statistical data to probabilistic conclusions
 
-- **discrete variable**: has limited number of possible values
+- **discrete variable**: has limited number of finitely many possible discrete values
+    - aka **categorical variable** or **factor**
 - **continuous variable**: can take any value
 
 ##### Discrete variable distributions
