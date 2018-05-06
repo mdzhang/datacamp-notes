@@ -174,6 +174,10 @@ def plot_1d_histogram():
     plt.show()
 
 
+def plot_categorical_histogram():
+    sns.countplot(x='foo', y='bar', data=df)
+
+
 def plot_2d_rect_histogram():
     # x and y have same length
     # specify bins along each axis
@@ -285,6 +289,10 @@ def plot_violin_plot():
     sns.violinplot(x='day', y='tip', data=tip, inner=False)
 
 
+def plot_boxplot():
+    df.boxplot('day', 'tip')
+
+
 ##############################################################################
 # Visualizing multivariate data
 ##############################################################################
@@ -316,3 +324,6 @@ def plot_covariance_matrix():
     """
     cov_matrix = df.cov()
     sns.heatmap(cov_matrix)
+
+    # heatmap of correlation between variables
+    sns.heatmap(df.corr(), square=True, cmap='RdYlGn')
