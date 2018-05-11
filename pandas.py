@@ -1,9 +1,9 @@
 """
 Notes from Datacamp's Pandas Foundations course
 """
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from scipy.stats import zscore
 
 # get indices of rows whose values in the 'species' column of the data frame are 'setosa'
@@ -557,5 +557,3 @@ pd.merge(bronze, gold, on=['NOC', 'Country'], suffixes=['_bronze', '_gold'])
 
 # merges and orders by index, then by column value left to right
 pd.merge_ordered()
-
-
