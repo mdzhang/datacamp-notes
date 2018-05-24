@@ -12,6 +12,13 @@
 
 - pandas categorical data types encode strings as numbers to speed up processing
 - `get_dummies` converts categorical data types to multiple columns (**dummy variables**) with a value of `0` or `1` i.e. to **binary indicator representation**
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(df[['numeric']],
+                                                    pd.get_dummies(df['label']),
+                                                    random_state=22)
+```
+
 - apply a lambda to each column
     ```python
     categorize_label = lambda x: x.astype('category')
@@ -21,3 +28,5 @@
 - start with basic model
   - less can go wrong than with complex models
   - see how much "signal" can be gleaned with basic methods
+  - less computationally expensive
+  - think carefully about features

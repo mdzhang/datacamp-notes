@@ -1,6 +1,7 @@
 # Machine Learning
 
 - **machine learning**: ability of computers to learn and make decisions from data w/o being explicitly programmed
+    - learning relationship between input and output pairs, x and y
 
 - **unsupervised learning**: uses unlabeled data
     - **clustering**: group data into categories, where categories not known beforehand

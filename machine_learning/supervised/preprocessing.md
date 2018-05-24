@@ -11,6 +11,9 @@ from sklearn.metrics import classification_report
 # the most frequently occuring value in that column (axis=0)
 imp = Imputer(missing_values='NaN', strategy='most_frequent', axis=0)
 
+# by default, would replace np.nan with the column mean
+imp = Imputer()
+
 # create a classifier
 clf = SVC()
 
@@ -54,3 +57,34 @@ print(classification_report(y_test, y_pred))
               ('SVM', clf)]
       pipeline = Pipeline(steps)
       ```
+
+- different pipeline steps per column
+
+```python
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.pipeline import Pipeline, FeatureUnion
+from sklearn.feature_extraction.text import CountVectorizer
+
+# just get 'text' column in returned data frame
+get_text_data = FunctionTransformer(lambda df: df['text'], validate=False)
+get_num_data = FunctionTransformer(lambda df: df['numeric'], validate=False)
+
+tpipe = Pipeline([
+  ('selector', get_text_data),
+  ('vectorizer', CountVectorizer())
+])
+
+npipe = Pipeline([
+  ('selector', get_num_data),
+  ('imputer', Imputer())
+])
+
+pl = Pipeline([
+  # feature union runs each step and concatenates output of each into wide array
+  ('union', FeatureUnion([
+    ('numeric', npipe),
+    ('text', tpipe)
+  ]),
+  ('clf', OneVsRestClassifier(LogisticRegression()))
+])
+```

@@ -110,4 +110,3 @@ mse = mean_squared_error(y_test, y_pred)
 
 - **elastic penalty**: `a * L1 + b * L2`
   - use `sklearn.linear_model.ElasticNet` for regressor class e.g. `reg = ElasticNet(l1_ratio=0.5, l2_ratio=0.5)`
-
