@@ -21,6 +21,7 @@
 
 - **overfitting**
     - sensitive to noise in the specific labeled data you have rather than reflecting general trends in the data
+    - predicts well on training data, but poorly on test data, new data sets
 
 - **imputting data**: make an educated guess as to what the missing values in a dataset could be
     - e.g. replace with mean of non-missing values
