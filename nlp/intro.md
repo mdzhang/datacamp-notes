@@ -89,6 +89,27 @@ computer_id = dictionary.token2id.get("computer")
 corpus = [dictionary.doc2bow(article) for article in articles]
 ```
 
+- **tf-if (term frequency - inverse document frequency)**: used to determine most important words in each document in a corpus by assigning weights to individual tokens
+    - identify common, shared words in a corpus that aren't just stopwords
+    - should be down-weighted in importance so common words don't show up as key words
+        - want words important within a document weighted high, not words important across whole corpus
+    - e.g. "sky" for an astronomy corpus
+
+    - `w(i, j) = tf(i, j) * log(N / df(i))`
+        - w(i, j): weight of token i in document j
+        - tf(i, j): # occurrences token i in document j / total # tokens in document j
+        - df(i): # documents containing token i
+        - N: total # documents
+        - recall `ln(1) = 0` so the more documents contain token i, the closer `N / df(i)` is to 1 so smaller the weight
+            - fewer documents containing token i, the larger `N / df(i)` is, the larger `ln(N / df(i)` is i.e. the heavier the weight
+
+      ```python
+      from gensim.models.tfidfmodel import TfidfModel
+
+      # tfidf is a dictionary of documents in a corpus => list of (word id, tfidf weight)
+      tfidf = TfidfModel(corpus)
+      ```
+
 ##### With scikit-learn
 
 ```python
@@ -96,6 +117,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 # split on whitespace
 TOKENS_ALPHANUMERIC = '[A-Za-z0-9]+(?=\\s+)'
+
+# extracts only those tokens that match the given pattern
+# each token is a feature for the model
 vec_alphanumeric = CountVectorizer(token_pattern=TOKENS_ALPHANUMERIC)
 
 # learn vocabulary dictionary of all tokens
@@ -104,19 +128,75 @@ vec_alphanumeric.fit(df['some_free_text_column'])
 vec_alphanumeric.get_feature_names()
 ```
 
+- tf-idf
 
 
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
 
+tfidf_vectorizer = TfidfVectorizer(stop_words="english", max_df=0.7)
 
+tfidf_train = tfidf_vectorizer.fit_transform(X_train)
+tfidf_test = tfidf_vectorizer.transform(X_test)
+print(tfidf_vectorizer.get_feature_names()[:10])
+```
 
+## Named Entity Recognition
 
+##### With nltk
 
+```python
+import nltk
 
+sentence = ...
 
+tokenized_sent = nltk.word_tokenize(sentence)
 
+# dict of tuples containing (token, part of speach)
+tagged_sent = nltk.pos_tag(tokenized_sent)
 
+# builds tree of tokens and their named entity type
+# e.g. New York => GPE (geopolitical entity)
+nltk.ne_chunk(tagged_sent)
 
+# use nltk.ne_chunk_sents if you have many sentences
+```
 
+##### With spacy
+
+- support for building NLP pipelines
+- different entity types than `nltk`
+- corpora for informal language
+- growing quickly
+
+```python
+import spacy
+
+# load pre-trained word vectors
+nlp = spacy.load('en')
+
+doc = nlp('some text...')
+
+# list entities, each with .text and .label_ fields
+doc.ents
+```
+
+## Machine Learning
+
+- **Naive Bayes Model** is commonly used for testing NLP classificationp problems
+    - answers: given a particular piece of data, how likely is an outcome?
+    - relatively simple and effective
+    - commonly used in domain since initial application in 1960s
+
+```python
+# multinomialnb good for multiple label classification
+from sklearn.naive_bayes import MultinomialNB
+from sklearn import metrics
+
+nb_clf = MultinomialNB()
+nb_clf.fit(count_train, y_train)
+pred = nb_clf.predict(count_test)
+```
 
 
 ## Machine Learning
