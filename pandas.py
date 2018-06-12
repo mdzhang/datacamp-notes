@@ -37,54 +37,6 @@ iris.loc[iris['species'] == 'versasomething'].plot(
 plt.show()
 
 ######################################################################
-# Pandas time series and date indexing
-#     - having a datetime index for dataframes allows you to easily
-#       slice and dice by dates
-######################################################################
-
-df = pd.read_csv(filename, index_col='Date', parse_dates=True)
-
-# extract observcations between 9pm and 10pm on '2010-10-11'
-ts1 = df.loc['2010-10-11 21:00:00':'2010-10-11 22:00:00']
-# extract observations from '2010-07-04'; use partial string indexing/slicing
-ts2 = df.loc['2010-07-04']
-# extract observations from '2010-12-15' to '2010-12-31'
-ts3 = df.loc['2010-12-15':'2010-12-31']
-
-# manually create a datetime index
-time_format = '%Y-%m-%d %H:%M'
-date_list = ['20100101 00:00', '20100101 01:00']
-temperature_list = [46.2, 44.6]
-my_datetimes = pd.to_datetime(date_list, format=time_format)
-time_series = pd.Series(temperature_list, index=my_datetimes)
-
-######################################################################
-# Resampling
-#    - down sampling: sample using same intervals, less frequent
-#    - upsampling: e.g. daily -> hourly
-######################################################################
-
-# (optional) integer + char to indicate sampling period
-
-# when down sampling, indicate how to aggregate values w/ e.g. mean()
-df1 = df.resample('6h').mean()  # 1 entry per 6 hrs
-df2 = df.resample('D').mean()  # 1 entry per day
-
-# when upsampling, indicate how to fill in missing data i.e. interpolate it
-# use linear interpolation scheme to smoothly fill in values
-df3 = df.resample('A').first().interpolate('linear')
-
-######################################################################
-# Rolling means aka moving averages
-#    - given a series of data, take average of different subsets of data
-#    - each subsequent subset excludes the head of the previous subset and adding the values following the tail of the previous subset
-#    - generally used to smooth data
-######################################################################
-
-# apply a rolling mean with a 24 hour window: smoothed
-smoothed = unsmoothed.rolling(window=24).mean()
-
-######################################################################
 # Apply built in functions to entire dataframe/series
 #   - use built in dataframe/series vectorized functions
 #   - else use numpy ufuncs (universal functions)
