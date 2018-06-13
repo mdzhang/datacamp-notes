@@ -100,21 +100,26 @@ plt.show()
         - if one distance is above mean, the other below => negatively related (anticorrelation)
     - `np.cov`
         - gives a covariance matrix where `[0, 0]` is variance of data for `x`, `[1,1]` for `y`, and `[1,0] == [0,1]`
-- **pearson correlation coefficient**: covariance / std(x) * std(y)
-    - aka Pearson r
-    - variability due to codepedence / independent variability
-    - range [-1, 1] where 1 indicates perfect correlation
-    - `np.corrcoef`
+- **correlation coefficient**: measures strength/lack of relationship between 2 variables
+  - when relationship is linear, use **pearson correlation coefficient**: covariance / std(x) * std(y)
+      - use `scipy.stats.stats.pearsonr` e.g. `pearsonr(x, y)`
+      - aka Pearson r
+      - variability due to codepedence / independent variability
+      - range [-1, 1] where 1 indicates perfect correlation
+      - `np.corrcoef`
 
-    ```python
-    def pearson_r(x, y):
-      """Compute Pearson correlation coefficient between two arrays."""
-      # Compute correlation matrix: corr_mat
-      corr_mat = np.corrcoef(x, y)
+      ```python
+      def pearson_r(x, y):
+        """Compute Pearson correlation coefficient between two arrays."""
+        # Compute correlation matrix: corr_mat
+        corr_mat = np.corrcoef(x, y)
 
-      # Return entry [0,1]
-      return corr_mat[0,1]
-    ```
+        # Return entry [0,1]
+        return corr_mat[0,1]
+      ```
+  - when relationship is non-linear, use **Spearman rank** or **Kendall Tau**
+      - use `scipy.stats.stats.spearmanr`, `scipy.stats.stats.kendalltau`
+
 
 ## Probability
 

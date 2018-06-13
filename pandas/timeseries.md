@@ -21,7 +21,6 @@
   seasonality = decomposition.seasonal
   ```
 
-
 ## Reading in data
 
 ```python
@@ -151,4 +150,61 @@ fig = tsaplots.plot_acf(co2_levels['co2'], lags=40)
 fig2 = tsaplots.plot_pacf(co2_levels['co2'], lags=40)
 
 plt.show()
+```
+
+- **correlation coefficient**: measures strength/lack of relationship between 2 variables
+  - what is it
+      - if close to zero, assume values not correlated
+      - if close to +/- 1, indicates strong positive/negative relationship
+  - when relationship is linear, use **pearson correlation coefficient**: covariance / std(x) * std(y)
+      - use `scipy.stats.stats.pearsonr` e.g. `pearsonr(x, y)`
+  - when relationship is non-linear, use **Spearman rank** or **Kendall Tau**
+      - use `scipy.stats.stats.spearmanr`, `scipy.stats.stats.kendalltau`
+
+```python
+import seaborn as sns
+
+# to get a correlation matrix
+# can also use methods: 'spearman', 'kendalltau'
+corr_mat = df[['col1', 'col2', 'col3']].corr(method='pearson')
+
+# get a heatmap of the correlation coefficient matrix
+sns.heatmap(corr_mat)
+
+# reorders row/columns of matrix so that more similar columns are closer to
+# e/o - makes map easier to interprete
+sns.clustermap(corr_mat)
+```
+
+## Working w/ multiple time series
+
+- similar to working w/ single column of time series data w/ pandas
+
+```python
+# will plot each column on same figure as a line
+# use a non-default colormap, else line colors will repeat if there
+# are > 6 time series columns
+ax = df.plot(colormap='Dark2')
+
+# alternatively, plot as an area graph
+ax = df.plot.area()
+
+# add a table with summary statistics for each column at the top of the
+# graph
+df_summary = df.describe()
+ax.table(cellText=df_summary.values,
+         colWidths=[0.3]*len(df.columns),
+         rowLabels=df_summary.index,
+         colLabels=df_summary.columns,
+         loc='top')
+
+# plot each column in a different subplot aka **facetted graph**
+df.plot(subplots=True,
+        layout=(2, 4),
+        sharex=False,
+        sharey=False,
+        colormap='viridis',
+        fontsize=2,
+        legend=False,
+        linewidth=0.2)
 ```
