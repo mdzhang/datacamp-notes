@@ -81,6 +81,78 @@
       - `pd.Series.corr`
   - when relationship is non-linear, use **Spearman rank** or **Kendall Tau**
       - use `scipy.stats.stats.spearmanr`, `scipy.stats.stats.kendalltau`
+  - trending datasets may seem correlated even when unrelated
+    - should look at percent change: `df['prices'].pct_change()`
+
+- **autocorrelation**: correlation between a time series and a delayed copy of itself
+    - what is it
+      - e.g. autocorrelation of order 3 returns correlation between `[t1, t2, t3]` and `[t4, t5, t6]`
+      - aka **autocovariates** or **serial correlation**
+      - normally refers to **lag-one autocorrelation** unless otherwise specified
+      - negative autocorrelation aka **mean reverting**
+      - positive autocorrelation aka **momentum**, **trend following**
+    - why use it
+      - find repetitive patterns or periodic signal in time series
+      - uncorrelated means previous values in series won't tell you much about later values in the series
+      - negatively autocorrelated means previous values in series likely indicate a drop in future values
+
+- **partial autocorrelation**: like autocorrelation, but removes effects of prvious time points (???)
+
+- **autocorrelation function (ACF)**: yields autocorrelation as a function of lag; 1 at lag 0
+    - how to interpret graph
+      - if values close to 0, values between consecutive observations are not correlated w/ e/o
+      - values close to +/- 1, indicate strong positive/negative relationship
+      - shaded region indicates confidence interval/margins of uncertainty; if values _outside_ shaded region, relationships are statistically significant
+        - alpha = 0.05: 5% chance that if true autocorrelation is 0, it will fall outside of shaded area
+        - alpha = 1: no bands on plot
+        - smaller confidence bands if alpha is lower or have fewer observations
+        - approximate confidence interval of `2 / sqrt(# observations)`
+
+    ```python
+    from statsmodels.graphics import tsaplots
+
+    # plot the autocorrelation function (acf) of time series data (tsa)
+    # alpha specifies width of confidence interval
+    fig = tsaplots.plot_acf(co2_levels['co2'], lags=40, alpha=0.05)
+    fig2 = tsaplots.plot_pacf(co2_levels['co2'], lags=40)
+
+    plt.show()
+
+    df['return'].autocorr()
+    ```
+
+- **white noise**: series w/ constant mean, constant variance, zero autocorrelations at all lags
+    - if data has Gaussian/normal distribution, aka **Gaussian white noise**
+    - generate w/ e.g. `noise = np.random.normal(loc=0, scale=1, size=500)` where `loc` is mean, `scale` is std dev
+- **random walk**: `p_today = p_yesterday + noise`
+  - **random walk with drift**: `p_today = p_yesterday + noise (epsilon) + drift (myu)`
+    - drift by `myu` every period
+
+  ```python
+  # simulate a random walk
+  steps = np.random.normal(loc=0, scale=1, size=500)
+  steps[0] = 0
+  P = 100 + np.cumsum(steps)
+  ```
+    - regression test for random walk: `p_today = alpha + beta * p_yesterday + epsilon`
+      - null hypothesis that series is a random walk: `beta == 1`
+      - alternate hypothesis: `beta < 1` (reject null hypothesis)
+  - equivalent to **Dickey-Fuller test**: `p_today - p_yesterday = alpha + beta * p_yesterday + epsilon`
+      - null hypothesis that series is a random walk: `beta == 0`
+      - alternate hypothesis: `beta < 0` (reject null hypothesis)
+      - if you add lags to right hand side (`p_yesterday`, `p_day_before_yesterday`), is aka the **augmented Dickey-Fueller test**
+      - use `statsmodels.tsa.stattools.adfuller` e.g. `test_stat, p_value, *more = adfuller(series)`
+
+- **stationarity**
+  - **strong stationarity**: distribution of data is time-invariant
+  - **weak stationarity**: mean, variance, autocorrelation of data are time-invariant
+  - parsimonious model (few parameters) needs to have relatively stationary data
+  - can transform non-stationary into stationary series by taking differences
+    - can take **first differences**
+    - can take differences with lag corresponding to periodicity
+
+
+
 ## Graphical EDA
 
 - graphical EDA makes it easier to see outliers and trends that can/should influence later analysis and prevent misinterpretation of data
@@ -160,6 +232,23 @@
 
     # fill in the contours with color
     np.contourf(Z)
+    ```
+
+- **heatmap**
+
+    ```python
+    import seaborn as sns
+
+    # to get a correlation matrix
+    # can also use methods: 'spearman', 'kendalltau'
+    corr_mat = df[['col1', 'col2', 'col3']].corr(method='pearson')
+
+    # get a heatmap of the correlation coefficient matrix
+    sns.heatmap(corr_mat)
+
+    # reorders row/columns of matrix so that more similar columns are closer to
+    # e/o - makes map easier to interprete
+    sns.clustermap(corr_mat)
     ```
 
 ### Annotations

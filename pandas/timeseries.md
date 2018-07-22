@@ -1,5 +1,8 @@
 # Pandas & Time Series Data
 
+- Related
+  - Statistics: correlation & autocorrelation
+
 ## Time Series Data
 
 - properties
@@ -127,55 +130,6 @@ df2 = df.resample('D').mean()  # 1 entry per day
 
 # use linear interpolation
 df3 = df.resample('A').first().interpolate('linear')
-```
-
-- **correlation coefficient**: measures strength/lack of relationship between 2 variables
-  - what is it
-      - if close to zero, assume values not correlated
-      - if close to +/- 1, indicates strong positive/negative relationship
-  - when relationship is linear, use **pearson correlation coefficient**: covariance / std(x) * std(y)
-      - use `scipy.stats.stats.pearsonr` e.g. `pearsonr(x, y)`
-  - when relationship is non-linear, use **Spearman rank** or **Kendall Tau**
-      - use `scipy.stats.stats.spearmanr`, `scipy.stats.stats.kendalltau`
-
-    ```python
-    import seaborn as sns
-
-    # to get a correlation matrix
-    # can also use methods: 'spearman', 'kendalltau'
-    corr_mat = df[['col1', 'col2', 'col3']].corr(method='pearson')
-
-    # get a heatmap of the correlation coefficient matrix
-    sns.heatmap(corr_mat)
-
-    # reorders row/columns of matrix so that more similar columns are closer to
-    # e/o - makes map easier to interprete
-    sns.clustermap(corr_mat)
-    ```
-
-    - trending datasets may seem correlated even when unrelated
-      - should look at percent change: `df['prices'].pct_change()`
-
-- **autocorrelation**: correlation between a time series and a delayed copy of itself
-    - what is it
-      - e.g. autocorrelation of order 3 returns correlation between `[t1, t2, t3]` and `[t4, t5, t6]`
-      - aka **autocovariates**
-    - why use it
-      - find repetitive patterns or periodic signal in time series
-    - how to interpret graph
-      - if values close to 0, values between consecutive observations are not correlated w/ e/o
-      - like correlation, if close to zero, assume values not correlated, but if close to +/- 1, indicates strong positive/negative relationship
-      - shaded region indicates confidence interval/margins of uncertainty; if values _outside_ shaded region, relationships are statistically significant
-- **partial autocorrelation**: like autocorrelation, but removes effects of prvious time points (???)
-
-```python
-from statsmodels.graphics import tsaplots
-
-# plot the autocorrelation function (acf) of time series data (tsa)
-fig = tsaplots.plot_acf(co2_levels['co2'], lags=40)
-fig2 = tsaplots.plot_pacf(co2_levels['co2'], lags=40)
-
-plt.show()
 ```
 
 ## Working w/ multiple time series

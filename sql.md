@@ -52,3 +52,16 @@
     WHERE  subquery.code = countries.code
     ORDER  BY lang_num DESC
     ```
+
+
+```sql
+/* selectl long_w of row with longest lat_n < 137.2345 */
+select round(long_w, 4)
+from (
+    select long_w, lat_n
+    from station
+    where lat_n < 137.2345
+    order by lat_n desc
+    limit 1
+) as r
+```
