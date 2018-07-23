@@ -151,8 +151,6 @@
     - can take **first differences**
     - can take differences with lag corresponding to periodicity
 
-
-
 ## Graphical EDA
 
 - graphical EDA makes it easier to see outliers and trends that can/should influence later analysis and prevent misinterpretation of data
@@ -165,8 +163,25 @@
       - help avoid **binning bias**: when same data interpreted differently when # bins is different
 
     ```python
+    # numpy
     arr = np.array([4.7, 4.5, 4.9])
     counts, bins, patches = plt.hist(arr, bins=np.sqrt(len(arr)))
+    ```
+
+    ```python
+    # pandas
+    df['alcohol'].plot.hist()
+    ```
+
+    ```python
+    # seaborn
+    sns.distplot(df['alcohol'], kde=False, bins=10)
+    ```
+
+- **rug plot**: adds perpendicular hashmarks along an axis to indicate actual data points; often in conjunction w/ KDE or histogram
+
+    ```python
+    sns.distplot(df['alcohol'], hist=False, rug=True, bins=10)
     ```
 
 - **scatterplot**: plot point for each observation
@@ -175,6 +190,37 @@
     # x, y
     plt.plot(total_votes/100, dem_share, marker='.', linestyle='none')
     ```
+
+    - with **regression line**
+
+      ```python
+      # more low-level
+      sns.regplot(x='alcohol', y='pH', data=df)
+
+      # support polynomial function fit of order 2
+      sns.regplot(x='alcohol', y='pH', data=df, order=2)
+
+      # for categorical vars, all points in same category along same vertical axis
+      # reduce jitter to better see distribution
+      sns.regplot(x='mnth', y='total_rentals', data=df, order=2, x_jitter=0.1)
+      # instead of jitter, just squash points using estimator to summarize values
+      # plot means with confidence intervals
+      sns.regplot(x='mnth', y='total_rentals', data=df, order=2, x_estimator=np.mean)
+
+      # linear model plot is more powerful
+      sns.lmplot(x='alcohol', y='pH', data=df)
+
+      # change color of scatterplot points based on value of 'type' column
+      sns.lmplot(x='alcohol', y='pH', data=df, hue='type')
+
+      # plot each different 'type' in its own subplot in its own column
+      sns.lmplot(x='alcohol', y='pH', data=df, col='type')
+
+      # plot each different 'type' in its own subplot in its own row
+      sns.lmplot(x='alcohol', y='pH', data=df, row='type')
+      ```
+
+      - **facetting**: plotting multiple graphs by changing a single variable
 
 - **boxplot**: shows min and max (at whiskers, or 1.5 IQR, whichever smaller), median at middle box line, 25th and 75th percentiles at box bottom and top, and outliers
 
@@ -186,7 +232,7 @@
     df.boxplot('day', 'tip')
     ```
 
-- **strip plot**: plots points in a univariate dataset along a vertical access
+- **strip plot**: plots all points in a univariate dataset along a vertical access
     - if there are many observations of similar values, will wil stip atop e/o
     - can add horizontal **jitter** so points form a cloud
 
@@ -197,7 +243,8 @@
 - **bee swarm plot**
     - unaffected by **binning bias**
     - like a strip plot, but automatically adds jitter to overlapping points
-    - not ideal when you have many observations that start to overlap each other in the plot
+        - uses algorithm to determine how to show points so they don't overlap
+    - not ideal when you have many observations that start to overlap each other in the plot - doesn't sccale well
 
     ```python
     sns.swarmplot(x='state', y='dem_share', data=df)
@@ -205,11 +252,156 @@
 
 - **violin plot**
     - like a box plot, but curves along the sides of a violin plot indicate density of the distribution
+    - curves are **kernel density plots (KDEs)**
 
    ```python
     # to disable inner box plot
     sns.violinplot(x='day', y='tip', data=tip, inner=False)
    ```
+
+- **lvplot**: letter-value plot
+    - faster to render than violin plot
+    - scales better than strip/swarm plot
+
+   ```python
+   sns.lvplot(x='day', y='tip', data=tip)
+   ```
+
+- **countplot**: shows # observations at each value; unlike histogram, no binning
+
+- **barplot**: bars used to plot some estimate of the data (e.g. average); black lines extending from bars indicate confidence interval
+
+   ```python
+   sns.barplot(x='day', y='tip', data=tip)
+   ```
+
+- **pointplot**: like barplot, shows summary measure and confidence interval
+    - lines drawn between points help visualize how values change across categories
+
+   ```python
+   sns.pointplot(x='day', y='tip', data=tip)
+   ```
+
+- **residplot**: for evaluating the fit of a model, graphs residuals
+
+    ```python
+    sns.residplot(data=df, x='temp', y='total_rentals')
+    ```
+
+- **matrix plots** need data to be in matrix, e.g. as returned by the below
+    - must be in **tidy** format i.e. one observation per row of data, columns are variables
+
+    ```python
+    df = pd.crosstab(df['mnth'], df['weekday'], values=df['total_rentals'], aggfunc='mean')
+
+    # to get a correlation matrix
+    # can also use methods: 'spearman', 'kendalltau'
+    corr_mat = df[['col1', 'col2', 'col3']].corr(method='pearson')
+    ```
+
+- **trellis plot** / **lattice plot**
+    - combine many subplots (small multiples) into larger visualization useful for identifying trends in data w/ many variables
+    - see interactions across different columns of data
+
+    - **faceting**: compare multiple plots side by side by using same scale and axis
+      - grid has same plot in each cell, but for different subselections of data
+
+      ```python
+      # define facets
+      # each column plot corresponds to different values of 'HIGHDEG'
+      g = sns.FacetGrid(df, col='HIGHDEG')
+
+      # map plot type
+      # each column plot will be a boxplot of 'Tuition' values
+      # order we want plots to be displayed in
+      g.map(sns.boxplot, 'Tuition', order=['1', '2', '3', '4'])
+
+      # instead of col, order can use row, row_order
+      ```
+
+      ```python
+      # equivalent to above
+      sns.factorplot(x='Tuition', data=df, col='HIGHDEG', kind='box')
+      ```
+
+      - `lmplot` plots scatter + regression plots on a `FacetGrid`
+
+      ```python
+      sns.lmplot(data=df, x='Tuition', y='SAT_AVG_ALL', col='HIGHDEG', fit_reg=False)
+
+      sns.lmplot(data=df,
+              x='SAT_AVG_ALL',
+              y='Tuition',
+              col="Ownership",
+              row='Degree_Type',
+              row_order=['Graduate', 'Bachelors'],
+              hue='WOMENONLY',
+              col_order=inst_ord)
+      ```
+
+    - different types of plots in each cell of grid
+
+      ```python
+      g = sns.PairGrid(df, vars=['Fair_Mrkt_Rent', 'Median_Income'])
+
+      # all plots are this type of plot
+      g = g.map(plt.scatter)
+
+      # histograms on the main diagonal (top left to bottom right)
+      g = g.map_diag(plt.hist)
+      # scatter plots on the anti diagonal (top right to bottom left)
+      g = g.map_offdiag(plt.scatter)
+      ```
+
+      ```python
+      sns.pairplot(df, vars=['Fair_Mrkt_Rent', 'Median_Income'], kind='reg',
+                   diag_kind='hist')
+
+      sns.pairplot(data=df,
+          x_vars=["fatal_collisions_speeding", "fatal_collisions_alc"],
+          y_vars=['premiums', 'insurance_losses'],
+          # antidiagonal
+          kind='scatter',
+          # main diagonal
+          diag_kind='kde',
+          hue='Region',
+          palette='husl')
+      ```
+
+    - compare distribution of data between 2 vars; has main plot and **marginal plots**
+
+      ```python
+      g = sns.JointGrid(data=df, x='Tuition', y='ADM_RATE_ALL')
+
+      # scatter plot w/ reg line in center, distribution curve plot in margins
+      g.plot(sns.regplot, sns.distplot)
+
+      # kde plot in the center (looks like a contour)
+      g = g.plot_join(sns.kdeplot)
+      # kde plots in marginals
+      g = g.plot_marginals(sns.kdeplot, shade=True)
+      # add pearson r value in corner
+      g = g.annotate(stats.pearsonr)
+      ```
+
+      ```python
+      sns.jointplot(data=df, x='Tuition', y='ADM_RATE_ALL', kind='hex')
+      ```
+
+- **heatmap**
+  ```python
+  # df from matrix plots above
+    sns.heatmap(df)
+
+    # turn on annotations in cells, format annotations as numbers
+    # specify color map to use
+    # don't show colorbar; increase width of lines between cells
+    sns.heatmap(df, annot=True, fmd='d', cmap='', cbar=False, linewidths=.5)
+
+    # reorders row/columns of matrix so that more similar columns are closer to
+    # e/o - makes map easier to interprete
+    sns.clustermap(corr_mat)
+    ```
 
 - **meshgrid**: graph of a matrix of values where each cell if filled with a color whose density is proportional to the value in that cell
     - often used with a **colorbar** which displays a gradient of colors and the numerical values associated with colors along the gradient
@@ -234,71 +426,109 @@
     np.contourf(Z)
     ```
 
-- **heatmap**
-
-    ```python
-    import seaborn as sns
-
-    # to get a correlation matrix
-    # can also use methods: 'spearman', 'kendalltau'
-    corr_mat = df[['col1', 'col2', 'col3']].corr(method='pearson')
-
-    # get a heatmap of the correlation coefficient matrix
-    sns.heatmap(corr_mat)
-
-    # reorders row/columns of matrix so that more similar columns are closer to
-    # e/o - makes map easier to interprete
-    sns.clustermap(corr_mat)
-    ```
 
 ### Annotations
 
-```python
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
+- visualization's **aesthetics** include e.g. layouts, labels, colors
+- visualizations should minimize extraneous markings so that the data speaks for itself
 
-# use a built in theme
-plt.style.use('ggplot')
+##### With `matplotlib`
 
-# or use seaborn styling
-sns.set()
+  ```python
+  import matplotlib.pyplot as plt
+  import seaborn as sns
+  import numpy as np
 
-# add axis labels`
-plt.xlabel('Date')
-plt.ylabel('Temperature')
+  # use a built in theme
+  plt.style.use('ggplot')
 
-# add graph title
-plt.title('Dew point')
+  # or use seaborn styling
+  sns.set()
 
-# only plot values with x in range (1947, 1957)
-plt.xlim((1947, 1957))
-# ...and y in range (0, 1000)
-plt.ylim((0, 1000))
+  # add axis labels`
+  plt.xlabel('Date')
+  plt.ylabel('Temperature')
 
-# alternatively we could have just
-plt.axis((1947, 1957, 0, 1000))
+  # add graph title
+  plt.title('Dew point')
 
-# add padding so no data points overlap the edge of the graph i.e. edges are farther out
-plt.margins(0.02)
+  # only plot values with x in range (1947, 1957)
+  plt.xlim((1947, 1957))
+  # ...and y in range (0, 1000)
+  plt.ylim((0, 1000))
 
-# xy indicates coordinates of what to point to
-# xytext indicates starting coordinates of arrow (so it'll point down and to the left)
-# specify `arrowprops` to make it an arrow, and make its color black
-plt.annotate(
-    'Maximum',
-    xy=(yr_max, cs_max),
-    xytext=(yr_max + 5, cs_max + 5),
-    arrowprops=dict(facecolor='black'))
+  # alternatively we could have just
+  plt.axis((1947, 1957, 0, 1000))
 
-# the label arg is used to indicate value for figure in legend
-plt.plot(year, computer_science, color='red', label='Computer Science')
-plt.legend(loc='lower right')
+  # add padding so no data points overlap the edge of the graph i.e. edges are farther out
+  plt.margins(0.02)
 
-# draw and display graph
-plt.show()
+  # xy indicates coordinates of what to point to
+  # xytext indicates starting coordinates of arrow (so it'll point down and to the left)
+  # specify `arrowprops` to make it an arrow, and make its color black
+  plt.annotate(
+      'Maximum',
+      xy=(yr_max, cs_max),
+      xytext=(yr_max + 5, cs_max + 5),
+      arrowprops=dict(facecolor='black'))
 
-# save figure to a file
-# autodetect file type from name
-plt.savefig('xlim_and_ylim.png')
-```
+  # the label arg is used to indicate value for figure in legend
+  plt.plot(year, computer_science, color='red', label='Computer Science')
+  plt.legend(loc='lower right')
+
+  # draw and display graph
+  plt.show()
+
+  # save figure to a file
+  # autodetect file type from name
+  plt.savefig('xlim_and_ylim.png')
+  ```
+
+##### With `seaborn`
+
+- determing colors
+
+  ```python
+  import seaborn as sns
+
+  # set default 'darkgrid' style
+  sns.set()
+
+  # use matplotlib color codes
+  sns.set(color_codes=True)
+  sns.distplot(df['Tuition'], color='g')
+
+  # iterate through default color palettes
+  for p in sns.palettes.SEABORN_PALETTES:
+    sns.set_palette(p)
+    sns.distplot(df['Tuition'])
+
+  # to get current palette
+  p = sns.color_palette()
+
+  # to plot first 6 colors of a palette
+  sns.palplot(p, 6)
+
+- customizing via axes
+-
+  ```python
+  fig, ax = plt.subplots()
+
+  sns.distplot(df['Tuition'], ax=ax)
+
+  # add x-axis label and limit min/max x value
+  ax.set(xlabel='Tuition 2013-14', xlim=(0, 70000))
+  # add a vertical dotted line to the plot
+  ax.axvline(x=20000, label='My budget', linestyle='-')
+
+  # show a legend (e.g. for axvline)
+  ax.legend()
+
+  # remove axis ticks
+  sns.despine(left=True)
+  ```
+
+- types of color palettes
+  - **circular / categorical**: use when data unordered
+  - **sequential**: use when data has consistent range from high to low (e.g. for heatmaps)
+  - **diverging**: use when data high & low values are interesting
