@@ -22,16 +22,55 @@
 - **overfitting**
     - sensitive to noise in the specific labeled data you have rather than reflecting general trends in the data
     - predicts well on training data, but poorly on test data, new data sets
+    - low training set error, high test set error
     - model may be too complex
+    - predictive power is low
+    - remedy:
+      - decrease model **complexity**
+      - gather more data
 
 - **underfitting**:
-    - model may be too simple
+    - model may be too simple; not complex enough to capture dependencies between features and labels
     - low training accuracy
+    - training/test set errors roughly equivalent, but both also relatively high
+    - measured error exceeds desired error
+    - remedy:
+      - increase model **complexity**
+      - gather more relevant features
 
 - **imputting data**: make an educated guess as to what the missing values in a dataset could be
     - e.g. replace with mean of non-missing values
 
 - **train/test split** may fail if split such that training set never sees a label that occurs in test split
+
+### Bias-Variance tradeoff
+
+- suppose you have a model `f^` that tries to approximate `f`, the true relationship between features and labels
+
+- **generalization error**: how poorly a model generalizes on unseen data
+    - definition
+      - `error(f^) = bias ** 2 + variance + irreducible error`
+      - **irreducible error**: contribution of noise that accompanies all data generation
+      - **bias**: on average, how different are `f` and `f^`
+          - high bias leads to **underfitting**
+          - accuracy
+      - **variance**: how much `f^` is inconsistent over different training sets
+          - high variance models lead to **overfitting**
+          - precision
+    - measurement
+      - difficult b/c
+        - `f` is unknown
+        - only have 1 dataset to measure variance for
+        - noise is unpredictable, can't gauge irreducible error
+      - can estimate by doing train/test split and using error on test set as approximator for generalization error
+          - with **K-fold cross validation**, can calculate the error on each fold, and take the average of all errors
+
+- model **complexity** sets flexibility to approximate true function f
+    - e.g. increasing max depth increases complexity of decision tree
+    - when model complexity increases, bias decreases and variance increases
+        - goal to find model complexity that minimizes generalization error
+
+- **bias-variance tradeoff**: as bias increases, variance decreases
 
 ### Classification Tasks
 
@@ -41,6 +80,8 @@ For when the target variable is discrete.
 
 - **k-Nearest neighbors (k-NN)**: find k=3 nearest neighbors, use whatever category majority of neighboring observations fall into to label new observation
     - can visualize **decision boundary** which highlights areas of graph and indicates how, were x values to fall there, they would be classified
+      - **decision region**: region in feature space where all instances assigned to 1 class label
+        - separated by surfaces known as **decision boundaries**
     - higher values for k = smoother decision boundary = less complex model
         - too high and can lead to **underfitting**
     - lower values for k = ?? decision boundary = more complex model = can lead to **overfitting**
