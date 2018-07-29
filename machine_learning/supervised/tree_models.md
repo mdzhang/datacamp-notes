@@ -35,6 +35,8 @@
       - can measure importance of each feature in prediction
           - how much tree uses a feature to reduce impurity; value is a percentage indicating weight of that feature in training and prediction
 
+- **decision stump**: decision tree w/ max depth of 1
+
 - **classification tree**: decision tree for categorical data
 
       ```python
@@ -174,4 +176,42 @@
     - estimator predictions are then aggregated
       - majority voting for classification tasks `sklearn.ensemble.RandomForestClassifier`
       - average value in regression tasks `sklearn.ensemble.RandomForestRegressor`
+
+## Boosting
+
+- **boosting**: ensemble method combining several weak learners to form a strong learner
+  - trains many estimators sequentially, each estimator learns from/corrects mistakes of its predecessor
+  - learning rate `eta` is a number in range `[0, 1]` used to weight / **shrink** `alpha` (adaboost) or the residuals in GB
+    - smaller eta should be counterbalanced with greater # estimators
+
+- **adaptive boosting** (aka **adaboost**)
+    - each predictor pays more attention to instances wrongly predicted by predecessor, by changing weights of instances
+    - each predictor given a weight, `alpha`, in the final meta model based on its training error
+    - CARTs are often used for estimators in adaboost, but don't have to be
+    - estimator predictions are then aggregated
+      - **weighted majority voting** for classification tasks `sklearn.ensemble.AdaBoostClassifier`
+      - weighted average value in regression tasks `sklearn.ensemble.AdaBoostRegressor`
+
+- **gradient boosting (GB)**
+    - does not tweak weights of training instances
+    - each predictor trained using predecessor's residual errors as labels
+    - **gradient boosted trees** have CARTs as **base learner**
+    - estimator predictions are then aggregated
+      - `sklearn.ensemble.GradientBoostingClassifier`
+      - `sklearn.ensemble.GradientBoostingRegressor`
+    - cons
+      - CARTs are trained to use best split point, features, etc.
+      - can lead multiple CARTs to use the same ones
+
+- **stochastic gradient boosting (SGB)**
+    - trees trained on random subset of training data without replacement (compensates for cons of regular GB)
+    - features samples w/o replacement when choosing split points (?)
+
+    ```python
+    from sklearn.ensemble import GradientBoostingRegressor
+
+    # subsample indicates how much of the training data
+    # max_features indicates nodes should use 20% of features to determine best split
+    sgbt = GradientBoostingRegressor(max_depth=1, subsample=0.8, max_features=0.2, n_estimators=300, seed=1)
+    ```
 

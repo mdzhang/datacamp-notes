@@ -10,6 +10,9 @@
     - if target variable is discrete, it's a **classification task**
         - binary decisions have discrete set of values i.e. true or false
 
+- **weak learner**: a model that performs only slightly better than random guessing
+- **strong learner**
+
 - **training data**: already labeled data classifier uses to learn
 - **test data**: already labeled data used to measure model/classifier performance
 - **hold-out set**: data used to evaluate how a model performs on unseen data when it's fitted using cross validation
