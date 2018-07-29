@@ -1,5 +1,7 @@
 # ML with Tree-based Models
 
+## CARTs Overview
+
 - **classification and regression trees (CARTs)** / **decision trees**
     - definition
       - supervised learning models used for problems involving classification and regression
@@ -30,6 +32,8 @@
     - evaluation
       - **mean squared error (MSE)** to guage error (`sklearn.metrics.mean_squared_error`)
       - typical accuracy measurements (`sklearn.metrics.accuracy_score`)
+      - can measure importance of each feature in prediction
+          - how much tree uses a feature to reduce impurity; value is a percentage indicating weight of that feature in training and prediction
 
 - **classification tree**: decision tree for categorical data
 
@@ -44,6 +48,20 @@
       y_pred = dt.predict(X_test)
 
       acc = accuracy_score(y_test, y_pred)
+
+      # get feature weight values
+      dt.feature_importances_
+      ```
+
+      - plot feature importance
+
+      ```python
+      importances = pd.Series(data=dt.feature_importances_,
+                              index=X_train.columns)
+
+      importances_sorted = importances.sort_values()
+
+      importances_sorted.plot(kind='barh', color='lightgreen')
       ```
 
 - **regression tree**
@@ -95,4 +113,65 @@
     - meta-model aggregates predictions of individual models
     - final prediction more robust and less prone to errors
 
-  (https://campus.datacamp.com/courses/machine-learning-with-tree-based-models-in-python/the-bias-variance-tradeoff?ex=9 @ 2:35)
+- **voting classifier**: chooses most common prediction among all its classifiers i.e. uses **hard voting**
+    - classifiers are fit to the same training set
+    - classifiers can use different algorithms
+
+    ```python
+    from sklearn.ensemble import VotingClassifier
+
+    # instantiate classifiers
+    ...
+
+    classifiers = [
+      ('logistic regression', lr),
+      ('k nearest neighbors', knn),
+      ('classification tree', dt),
+    ]
+
+    # fit individual classifiers
+    ...
+
+    vc = VotingClassifier(estimators=classifiers)
+    vc.fit(X_train, y_train)
+    y_pred = vc.predict(X_test)
+    ```
+
+-  **bootstrap aggregation** (**bagging** for short): ensemble method where you use the same algorithm/classifier, but with each instance of the classifier trained on a different subset of the training set
+    - reduces variance of individual models in the ensemble (?)
+    - draw bootstrap samples from the original data set w/ replacement i.e. any single observation can be drawn any number of times
+        - also means that potentially some observations are not sampled at all
+        - on average, model samples 63% of all observations
+        - remaining 37% are **out of bag (OOB)** instances
+    - use all features of the data to generate predictions
+    - estimator predictions are then aggregated
+      - majority voting for classification tasks `sklearn.ensemble.BaggingClassifier`
+      - average value in regression tasks `sklearn.ensemble.BaggingRegressor`
+
+    ```python
+    from sklearn.ensemble import BaggingClassifier
+
+    dt = DecisionTreeClassifier(max_depth=4, min_samples_leaf=0.16)
+    bc = BaggingClassifier(base_estimator=dt, n_estimators=300, n_jobs=-1)
+    ```
+
+    - OOB instances can be used for evaluation (instead of e.g. k-fold cross validation) since they are not used in training
+        - **OOB evaluation** generates a value that averages OOB scores across all estimators
+        - evaluation method is often accuracy for classifiers, R2 for regressors
+
+    ```python
+    bc = BaggingClassifier(base_estimator=dt, n_estimators=300, n_jobs=-1, oob_score=True)
+    bc.fit(X_train, y_train)
+    oob_accuracy = bc.oob_score_
+    ```
+
+- **random forests**
+    - definition
+      - uses decision tree as base estimator
+      - trains estimators on different bootstrap samples, each the same size as training data set
+      - decision tree samples `d` features at each node/split w/o replacement (?)
+          - `d` defaults to `math.sqrt(len(features))`
+    - estimator predictions are then aggregated
+      - majority voting for classification tasks `sklearn.ensemble.RandomForestClassifier`
+      - average value in regression tasks `sklearn.ensemble.RandomForestRegressor`
+
