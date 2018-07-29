@@ -167,7 +167,7 @@
     oob_accuracy = bc.oob_score_
     ```
 
-- **random forests**
+- **random forests (RF)**
     - definition
       - uses decision tree as base estimator
       - trains estimators on different bootstrap samples, each the same size as training data set
@@ -214,4 +214,34 @@
     # max_features indicates nodes should use 20% of features to determine best split
     sgbt = GradientBoostingRegressor(max_depth=1, subsample=0.8, max_features=0.2, n_estimators=300, seed=1)
     ```
+
+## Hyperparameter Tuning
+
+```python
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import roc_auc_score
+
+params_dt = {
+    'max_depth': [2, 3, 4],
+    'min_samples_leaf': [0.12, 0.14, 0.16, 0.18 ]
+}
+
+grid_dt = GridSearchCV(estimator=dt, param_grid=params_dt, scoring='accuracy', cv=10, n_jobs=-1, verbose=1)
+
+grid_dt.fit(X_train, y_train)
+
+# best params
+grid_dt.best_params_
+
+# best accuracy score
+grid_dt.best_score_
+
+# best model
+grid_dt.best_estimator_
+
+test_acc = grid_dt.best_estimator_.score(X_test, y_test)
+
+y_pred_proba = grid_dt.best_estimator_.predict_proba(X_test)[:,1]
+test_roc_auc = roc_auc_score(y_test, y_pred_proba)
+```
 

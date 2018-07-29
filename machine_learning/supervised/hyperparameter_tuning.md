@@ -2,12 +2,16 @@
 
 - models, algorithms below often need additional parameter values (see k in k-NN, coefficients in linear regression, alpha in ridge/lasso regression) that cannot be learned by fitting the model aka they must be chosen
     - aka **hyperparameters**
-    - **hyperparameter tuning**: selecting best value for hyperparameters to get optimal model performance
+    - **hyperparameter tuning**: selecting best value for hyperparameters to get **optimal model** performance
       - select different value
       - fit all of them to your model separately
       - measure performance
-          - use **cross-validation** to avoid overfitting parameters to test/train split
+          - use **cross-validation** to avoid overfitting parameters to test/train split, evaluate a model's ability to generalize and work on unseen data
       - select most performant values
+    - **optimal model**  has optimal **score**
+        - **score** defaults to accuracy (classification tasks) or R^2 (regression tasks)
+
+- parameters are learned from data, but hyperparameters are not (and are set prior to training)
 
 - **grid search cross-validation (cv)**: creates a grid where x-axis has values for one parameter, y-axis for another
     - perform cross-validation for each possible combination and store value in grid
@@ -49,4 +53,8 @@
     cv.predict(X_test)
     ```
 
+- **random search**
 
+- **bayesian optimization**
+
+- **genetic algorithms**
