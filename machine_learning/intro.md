@@ -21,3 +21,13 @@
 - predictor variables are columns in 2D array
 - rows are samples/individual observations
 - dimension of dataset == # features
+
+- **human in the loop machine learning system**
+  - machine learning algorithm determines a label with some probability
+  - human prioritizes time spent based on those probabilities
+
+- start with basic model
+  - less can go wrong than with complex models
+  - see how much "signal" can be gleaned with basic methods
+  - less computationally expensive
+  - think carefully about features
