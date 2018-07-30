@@ -1,6 +1,22 @@
 ## Data preprocessing
 
-- imputing data
+- occurs after data cleaning and exploratory data analysis (EDA)
+- prep data for e.g. modeling
+
+##### Removing missing data
+
+- drop all empty values in all columns and rows: `df.dropna()`
+- drop all empty values in specific rows by index: `df.drop([1, 2, 3])`
+- drop column: `df.drop('col_name', axis=1)`
+- drop all rows with an empty value in specific column: `df[df['col_name'].notnull()]`
+- drop all columns with at least 3 empty values: `df.dropna(axis=1, thresh=3)`
+
+##### Converting data types
+
+- for specific column: `df['col_name'] = df['col_name'].astype('float')`
+    - available types: `float`, `int`, `string`
+
+##### Imputing Data
 
 ```python
 from sklearn.preprocessing import Imputer
@@ -34,6 +50,8 @@ y_pred = pipeline.predict(X_test)
 print(classification_report(y_test, y_pred))
 ```
 
+##### Standardizing Data
+
 - **normalizing data** aka **scaling and centering** brings all data values to be on a similar scale to avoid one unduly influencing a model
     - multiple normalization methods e.g.
       - convert to [0, 1] range by subtracting the minimum and dividing by the range
@@ -57,34 +75,3 @@ print(classification_report(y_test, y_pred))
               ('SVM', clf)]
       pipeline = Pipeline(steps)
       ```
-
-- different pipeline steps per column
-
-```python
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.pipeline import Pipeline, FeatureUnion
-from sklearn.feature_extraction.text import CountVectorizer
-
-# just get 'text' column in returned data frame
-get_text_data = FunctionTransformer(lambda df: df['text'], validate=False)
-get_num_data = FunctionTransformer(lambda df: df['numeric'], validate=False)
-
-tpipe = Pipeline([
-  ('selector', get_text_data),
-  ('vectorizer', CountVectorizer())
-])
-
-npipe = Pipeline([
-  ('selector', get_num_data),
-  ('imputer', Imputer())
-])
-
-pl = Pipeline([
-  # feature union runs each step and concatenates output of each into wide array
-  ('union', FeatureUnion([
-    ('numeric', npipe),
-    ('text', tpipe)
-  ]),
-  ('clf', OneVsRestClassifier(LogisticRegression()))
-])
-```

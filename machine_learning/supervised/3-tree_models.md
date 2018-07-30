@@ -1,4 +1,4 @@
-# ML with Tree-based Models
+# Tree-based Models
 
 ## CARTs Overview
 

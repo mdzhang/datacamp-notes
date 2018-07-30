@@ -1,85 +1,10 @@
-## Supervised Learning
+## Classification
 
-- **supervised learning**: uses labeled data
-    - has **predictor variables/features/independent variables** and a **target/response/dependent variable**
-    - **labeled data** has known output i.e. target variable value is known
-    - goal is to build a model that can predict target variable given predictor variables
-        - to automate time consuming or expensive manual task
-        - to make predictions about the future
-    - if target variable is continuous, it's a **regression task**
-    - if target variable is discrete, it's a **classification task**
-        - binary decisions have discrete set of values i.e. true or false
+- **classification tasks** are tasks that attempt to predict a target variable with discrete possible values
 
-- **weak learner**: a model that performs only slightly better than random guessing
-- **strong learner**
+### Classifiers
 
-- **training data**: already labeled data classifier uses to learn
-- **test data**: already labeled data used to measure model/classifier performance
-- **hold-out set**: data used to evaluate how a model performs on unseen data when it's fitted using cross validation
-
-- running a model on a dataset aka "training a model on", "fitting a model to", "fitting a classifier to" data
-- split data into **training data** and **test data**
-    - don't reuse training data when measuring model performance - model has already seen it, not indicative of ability to generalize
-    - split test/training data so that both reflect larger data set, each reflects distribution of original data set
-
-- **overfitting**
-    - sensitive to noise in the specific labeled data you have rather than reflecting general trends in the data
-    - predicts well on training data, but poorly on test data, new data sets
-    - low training set error, high test set error
-    - model may be too complex
-    - predictive power is low
-    - remedy:
-      - decrease model **complexity**
-      - gather more data
-
-- **underfitting**:
-    - model may be too simple; not complex enough to capture dependencies between features and labels
-    - low training accuracy
-    - training/test set errors roughly equivalent, but both also relatively high
-    - measured error exceeds desired error
-    - remedy:
-      - increase model **complexity**
-      - gather more relevant features
-
-- **imputting data**: make an educated guess as to what the missing values in a dataset could be
-    - e.g. replace with mean of non-missing values
-
-- **train/test split** may fail if split such that training set never sees a label that occurs in test split
-
-### Bias-Variance tradeoff
-
-- suppose you have a model `f^` that tries to approximate `f`, the true relationship between features and labels
-
-- **generalization error**: how poorly a model generalizes on unseen data
-    - definition
-      - `error(f^) = bias ** 2 + variance + irreducible error`
-      - **irreducible error**: contribution of noise that accompanies all data generation
-      - **bias**: on average, how different are `f` and `f^`
-          - high bias leads to **underfitting**
-          - accuracy
-      - **variance**: how much `f^` is inconsistent over different training sets
-          - high variance models lead to **overfitting**
-          - precision
-    - measurement
-      - difficult b/c
-        - `f` is unknown
-        - only have 1 dataset to measure variance for
-        - noise is unpredictable, can't gauge irreducible error
-      - can estimate by doing train/test split and using error on test set as approximator for generalization error
-          - with **K-fold cross validation**, can calculate the error on each fold, and take the average of all errors
-
-- model **complexity** sets flexibility to approximate true function f
-    - e.g. increasing max depth increases complexity of decision tree
-    - when model complexity increases, bias decreases and variance increases
-        - goal to find model complexity that minimizes generalization error
-
-- **bias-variance tradeoff**: as bias increases, variance decreases
-
-### Classification Tasks
-
-For when the target variable is discrete.
-
-#### Algorithms
+##### kNN
 
 - **k-Nearest neighbors (k-NN)**: find k=3 nearest neighbors, use whatever category majority of neighboring observations fall into to label new observation
     - can visualize **decision boundary** which highlights areas of graph and indicates how, were x values to fall there, they would be classified
@@ -107,7 +32,13 @@ knn.fit(x, y)
 y_pred = knn.predict(x_new)
 ```
 
-### Linear Classifiers
+#### Linear Classifiers
+
+- linear models learn **decision boundaries** which separate predicted classes
+  - can be a straight line in each plane dividing areas on either side of lines into different decision areas
+  - can be nonlinear, non-contiguous regions (e.g. like a contour map)
+- **linear classifiers** are classifiers that learn linear decision boundaries
+- **linearly separable**: dataset can be perfectly explained by linear classifier; is no linear boundary that perfectly classifies all points
 
 - **dot product**: multiple vectors element-wise and sum
 - underlying function of form:
@@ -117,12 +48,15 @@ y_pred = knn.predict(x_new)
       - along decision boundary, model outputs 0
   - changing intercept can shift orientation boundary
 
-##### Models
+
+##### Linear regression
 
 - **linear regression (linreg)**
   - in `sklearn`, minimizes sum of squared error i.e. sum of squared error is the **loss function**
       - need to choose coefficients that minimize loss
       - done by `linreg.fit` function
+
+##### Logistic regression
 
 - **logistic regression (logreg)**
   - outputs probability `p`; if `p < 0.5`, label `1` aka `true`; else if `p > 0.5`, label `0` aka `false`
@@ -165,6 +99,7 @@ y_pred = knn.predict(x_new)
       print("Number of selected features:", np.count_nonzero(coefs))
       ```
 
+##### Multiclass Logistic Regression
 
 - **multi class logistic regression**
     - **one vs rest strategy**: train a binary classifier for each class (1 for is class, 0 for is not a specific class)
@@ -190,6 +125,8 @@ y_pred = knn.predict(x_new)
     lr = LogisticRegression(multi_class='multinomial', solver='lbfgs')
     ```
 
+##### Linear SVC
+
 - **linear svc**
   - use `sklearn.svm.LinearSVC`
   - use **hinge loss**
@@ -207,7 +144,6 @@ y_pred = knn.predict(x_new)
       - if example not in support vector, has no effect on model if removed
       - acceptable "closeness" determined by regularization strength
       - maximizes **margin** for linearly separable datasets i.e. the distance between boundary and closest example
-
 
 - **svc**: non-linear SVM
   - use `sklearn.svm.SVC`
@@ -235,52 +171,7 @@ y_pred = knn.predict(x_new)
   - scales well to large datasets
   - uses `alpha` instead of `C` to indicate regularization; higher alpha == more regularization
 
-##### More
-
-- linear models learn **decision boundaries** which separate predicted classes
-  - can be a straight line in each plane dividing areas on either side of lines into different decision areas
-  - can be nonlinear, non-contiguous regions (e.g. like a contour map)
-- **linear classifiers** are classifiers that learn linear decision boundaries
-- **linearly separable**: dataset can be perfectly explained by linear classifier; is no linear boundary that perfectly classifies all points
-
-### Back to k-NN
-
-- **receiver operating characteristic curve (ROC)**: curve resulting from graphing different `p` thresholds against false positive rate aka **fallout** (x-axis) and true positive rate aka **recall** (y-axis)
-    ```python
-    from sklearn.metrics import roc_curve
-
-    # get probability of sample being in a particular class (0 or 1)
-    # predict_proba() returns matrix with row for each observation
-    #   that has 2 values - probability of being 0, probability of being 1
-    y_pred_prob = logreg.predict_proba(X_test)[:,1]
-
-    # get false positive rate, true positive rate, p thresholds
-    fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
-
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.plot(fpr, tpr)
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve')
-    plt.show()
-    ```
-
-    - better models have larger **area under [ROC] curve (AUC)** since these means true positive rate approaches 1, false positive rate approaches 0
-    - ???
-
-    ```python
-    from sklearn.metrics import roc_auc_score
-    from sklearn.model_selection import cross_val_score
-
-    # AUC
-    y_pred_prob = logreg.predict_proba(X_test)[:,1]
-    roc_auc_score(y_test, y_pred_prob)
-
-    # AUC with cross validation
-    cv_results = cross_val_score(reg, X_test, y_test, cv=5, scoring='roc_auc')
-    ```
-
-#### Measuring Model Performance
+## Measuring Model Performance
 
 - measure model performance by running it on a dataset and calculating a performance metric
 - **accuracy**: total # correct predictions / total # data points
@@ -348,3 +239,38 @@ def compute_log_loss(predicted, actual, eps=1e-14):
   loss = -1 * np.mean(actual * np.log(predicted) + (1 - actual) * np.log(1-predicted))
   return loss
 ```
+
+- **receiver operating characteristic curve (ROC)**: curve resulting from graphing different `p` thresholds against false positive rate aka **fallout** (x-axis) and true positive rate aka **recall** (y-axis)
+    ```python
+    from sklearn.metrics import roc_curve
+
+    # get probability of sample being in a particular class (0 or 1)
+    # predict_proba() returns matrix with row for each observation
+    #   that has 2 values - probability of being 0, probability of being 1
+    y_pred_prob = logreg.predict_proba(X_test)[:,1]
+
+    # get false positive rate, true positive rate, p thresholds
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred_prob)
+
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.plot(fpr, tpr)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+    plt.show()
+    ```
+
+    - better models have larger **area under [ROC] curve (AUC)** since these means true positive rate approaches 1, false positive rate approaches 0
+    - ???
+
+    ```python
+    from sklearn.metrics import roc_auc_score
+    from sklearn.model_selection import cross_val_score
+
+    # AUC
+    y_pred_prob = logreg.predict_proba(X_test)[:,1]
+    roc_auc_score(y_test, y_pred_prob)
+
+    # AUC with cross validation
+    cv_results = cross_val_score(reg, X_test, y_test, cv=5, scoring='roc_auc')
+    ```
