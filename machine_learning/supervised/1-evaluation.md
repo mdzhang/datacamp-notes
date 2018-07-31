@@ -2,7 +2,9 @@
 
 - measure model performance by running it on a dataset and calculating a performance metric
 
-## Accuracy
+## Measuring Predictive Performance
+
+### Accuracy
 
 - **accuracy**: total # correct predictions / total # data points
     - not always the best measure of model performance e.g. when a **class imbalance** exists e.g. 99% email not spam, 1% spam
@@ -10,7 +12,7 @@
     - `sklearn` models often have a `.score()` method that uses accuracy as a default
     - commonly used for multiclass classification
 
-## Confusion Matrix
+### Confusion Matrix
 
 - **confusion matrix**:
 
@@ -40,26 +42,7 @@
     classification_report(y_test, y_pred)
     ```
 
-## Log Loss
-
-- **log loss**: a loss function to be minimized; can measure model performance by seeing which has smallest error
-    - looks at actual value, predicted value, and confidence (`p`)
-    - penalizes high confidence when wrong
-    - minimized most when correct and confident
-
-    ```python
-    def compute_log_loss(predicted, actual, eps=1e-14):
-      """Compute log loss
-
-      eps: log(0) is infinity, so offset predicted values slightly from 0 or 1
-      """
-      # values smaller than eps become eps, values larger than 1 - eps become 1 - eps
-      predicted = np.clip(predicted, eps, 1 - eps)
-      loss = -1 * np.mean(actual * np.log(predicted) + (1 - actual) * np.log(1-predicted))
-      return loss
-    ```
-
-## ROC
+### ROC
 
 - **receiver operating characteristic curve (ROC)**:
     - curve resulting from graphing different `p` thresholds against
@@ -100,3 +83,44 @@
     # AUC with cross validation
     cv_results = cross_val_score(reg, X_test, y_test, cv=5, scoring='roc_auc')
     ```
+
+### Loss Functions
+
+- **loss functions** aka **objective functions** quantify how far off a prediction is from an actual result for real number value predictions
+    - goal of learners is to yield minimum value of loss function
+
+#### Log Loss
+
+- **log loss**: a loss function to be minimized; can measure model performance by seeing which has smallest error
+    - looks at actual value, predicted value, and confidence (`p`)
+    - penalizes high confidence when wrong
+    - minimized most when correct and confident
+
+    ```python
+    def compute_log_loss(predicted, actual, eps=1e-14):
+      """Compute log loss
+
+      eps: log(0) is infinity, so offset predicted values slightly from 0 or 1
+      """
+      # values smaller than eps become eps, values larger than 1 - eps become 1 - eps
+      predicted = np.clip(predicted, eps, 1 - eps)
+      loss = -1 * np.mean(actual * np.log(predicted) + (1 - actual) * np.log(1-predicted))
+      return loss
+    ```
+
+## Measuring (and Penalizing) Complexity
+
+- **regularization** penalizes complex models
+
+- **gamma**
+  - measure for tree-based learners that determines whether a node will split based on expected reduction in loss (?)
+  - higher values for gamma lead to fewer splits
+
+- **alpha** aka **L1 regularization**
+  - in tree-based learners
+    - penalizes leaf (not feature) weights
+    - higher alpha => stronger regularization => leaf weights approach 0
+
+- **lambda** aka **L2 regularization**
+  - leaf weights decrease smoothly v L1 strong sparsity constraints (?)
+

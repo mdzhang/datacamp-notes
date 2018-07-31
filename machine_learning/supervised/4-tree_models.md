@@ -5,15 +5,18 @@
 - **classification and regression trees (CARTs)** / **decision trees**
     - definition
       - supervised learning models used for problems involving classification and regression
-      - can answer if-else questions about features to infer labels
+      - can answer if-else (i.e. binary) questions about features to infer labels
       - produces rectangular decision regions (v linear boundaries in linear regression models)
     - structure
       - binary tree consist of nodes
         - ea node is a question (root or internal node) or prediction (leaf node)
-        - leaves have a predominant classification label i.e. leaves are **pure**
+        - leaves represent predictions
+          - are exclusively of one category or have a single, predominant category (classification label) in the majority
+          - i.e. leaves are **pure**
         - to product purest leaves, at each node, tree asks question `g(f, sp)` where `f` is a feature and `sp` is a **split point**
             - picks `f` and `sp` by seeing which values maximize **information gain**
             - if `IG = 0`, node is a leaf
+            - **split** encapsulates a feature to split on and where in the feature's range of values to split (**split point**)
         - can measure impurity of a node w/ e.g. **gini index** or **entropy**
             - mostly have the same result, gini is faster to compute and is the sklearn default
 
@@ -21,8 +24,9 @@
       dt_entropy = DecisionTreeClassifier(max_depth=8, criterion='entropy', random_state=1)
       dt_entropy.fit(X_train, y_train)
       ```
+
     - pros
-      - flexibility: can capture non-linear relationships between features and models
+      - flexibility: can capture non-linear relationships between features and models relatively easily (low bias)
       - easier preprocessing: don't require feature scaling/standardization
       - simple to understand, use, interpret
     - cons
@@ -34,6 +38,8 @@
       - typical accuracy measurements (`sklearn.metrics.accuracy_score`)
       - can measure importance of each feature in prediction
           - how much tree uses a feature to reduce impurity; value is a percentage indicating weight of that feature in training and prediction
+
+- strictly, **decision trees** have predictions in leaves, whereas **CARTs** have a real-valued score in each leaf, regardless of whether used for classification or regression
 
 - **decision stump**: decision tree w/ max depth of 1
 
@@ -108,6 +114,7 @@
 ## Ensemble learning
 
 - **ensemble methods**: compensate for weakness of CARTs by aggregating the predictions of trees that are trained differently
+    - **base learner**: individual learning algorithm in an ensemble algorithm
 - **ensemble learning**
     - train different models on same dataset
         - models can use different algorithms e.g. decision tree, linear regression, kNN, etc.
@@ -181,6 +188,9 @@
 
 - **boosting**: ensemble method combining several weak learners to form a strong learner
   - trains many estimators sequentially, each estimator learns from/corrects mistakes of its predecessor
+  - estimators trained on subsets of the data
+  - weight weak predictions according to weak learner's performance
+  - combine weighted predictions to get a single prediction
   - learning rate `eta` is a number in range `[0, 1]` used to weight / **shrink** `alpha` (adaboost) or the residuals in GB
     - smaller eta should be counterbalanced with greater # estimators
 
@@ -214,6 +224,86 @@
     # max_features indicates nodes should use 20% of features to determine best split
     sgbt = GradientBoostingRegressor(max_depth=1, subsample=0.8, max_features=0.2, n_estimators=300, seed=1)
     ```
+
+### XGBoost
+
+- started as C++ lib; now has bindings/APIs in multiple langs
+- fast b/c core algorithm is parallelizable
+- performs well on multiple ML problems
+- usually used w/ decision trees as base learners
+    - want weak learners that are slightly better than random on some subsets of data, uniformly bad at the remainder
+- when to use:
+  - large # training samples (samples >= 1000, features fewer than 100 || more samples than features)
+  - have numeric or mixed categorical/numeric features
+- when not to use:
+  - problems that have other state of the art algorithmic solutions
+      - e.g. deep learning better suited to image recognition, computer vision, natural language
+
+- classification task w/ tree base learner
+
+  ```python
+  import xgboost as xgb
+  from sklearn.model_selection import train_test_split
+
+  X_train, X_test, y_train, y_test = train_test_split(X, y)
+  xg_cl = xgb.XGBClassifier(objective='binary:logistic', n_estimators=10)
+
+  xg_cl.fit(X_train, y_train)
+  y_pred = xg_cl.predit(X_test)
+
+  accuracy = float(np.sum(preds==y_test)) / y_test.shape[0]
+  ```
+
+- use `xgb.XGBRegressor(objective='reg:linear')` for regression tasks w/ tree base learner
+
+- cross validation
+
+  ```python
+  # convert to custom data structure optimized for performance
+  dm = xgb.DMatrix(data=X, label=y)
+
+  # pass e.g. 'alpha': ... for regularization
+  params = {"objective":"reg:logistic", "max_depth":3}
+
+  # num_boost_round: # trees to use
+  # as_pandas: whether to return pandas df
+  # stores training/test (mean err, std dev err) per boosting round (i.e. tree built)
+  results = xgb.cv(dtrain=dm, params=params, nfold=4, num_boost_round=10,
+                   metrics='error', as_pandas=True)
+  accuracy = (1 - cv_results['test-error-mean']).iloc[-1]
+  ```
+
+- with linear base learner
+
+  ```python
+  ...
+
+  DM_train = xgb.DMatrix(data=X_train, label=y_train)
+  DM_test = xgb.DMatrix(data=X_test, label=y_test)
+
+  params = {'booster': 'gblinear', 'objective': 'reg:linear'}
+
+  xg_reg = xgb.train(params=params, dtrain=DM_train, num_boost_round=10)
+  preds = xg_reg.predict(DM_test)
+
+  rmse = np.sqrt(mean_squared_error(y_test, preds))
+  ```
+
+- visualizing decision tree
+
+  ```python
+  # plot tree from 4th boosting round
+  xgb.plot_tree(xg_reg, num_trees=4)
+
+  # plot tree sideways
+  xgb.plot_tree(xg_reg, rankdir='LR')
+  ```
+
+- visualizing feature importance
+
+  ```python
+  xgb.plot_importance(xg_reg)
+  ```
 
 ## Hyperparameter Tuning
 

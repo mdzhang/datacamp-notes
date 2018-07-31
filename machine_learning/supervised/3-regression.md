@@ -46,6 +46,10 @@ mse = mean_squared_error(y_test, y_pred)
     - if just summing residuals, large negative residual could cancel out large positive residual, so use squared residual (z ** 2 >= 0)
 
 - **root mean squared error (RMSE)**: square root of the average of squared errors
+    - squaring compensates for negative values
+    - punishes large errors much more than small errors
+
+- **mean absolute error (MAE)**: average of sum of absolute errors
 
 #### Measuring Model Performance
 

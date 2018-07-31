@@ -11,7 +11,7 @@
         - binary decisions have discrete set of values i.e. true or false
 
 - **weak learner**: a model that performs only slightly better than random guessing
-- **strong learner**
+- **strong learner**: any algorithm that can be tuned to achieve arbitrarily good performance for some supervised learning problem
 
 - **training data**: already labeled data classifier uses to learn
 - **test data**: already labeled data used to measure model/classifier performance
