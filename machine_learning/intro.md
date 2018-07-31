@@ -16,7 +16,11 @@
     - if target variable is continuous, it's a **regression task**
     - if target variable is discrete, it's a **classification task**
         - binary decisions have discrete set of values i.e. true or false
+        - for problems involving binary or multi-class outcomes
 
+- **ranking**: predict an ordering on a set of choices
+
+- **recommendation**: recommend item to user based on history/profile
 
 - predictor variables are columns in 2D array
 - rows are samples/individual observations

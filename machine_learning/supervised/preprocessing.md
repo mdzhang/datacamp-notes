@@ -31,7 +31,7 @@
 
 ## Standardizing Data
 
-- **normalization** / **scaling and centering** / **standardization**
+- **normalization** / **scaling and centering** / **standardization** / **z-scoring**
   - applies to continuous, numerical data
   - the transformation of continuous data to make it look normally distributed
   - compensates for **numerical noise**
